@@ -69,7 +69,6 @@
 }
 
 .theme-toggle {
-    
   font-size: 20px;
   padding: 5px 10px;
   background: none;
@@ -83,23 +82,19 @@
   }
 
   .navbar-links {
-    display: flex;
-    flex-direction: row;
-    /* width: 100%; */
+    display: none;
+    flex-direction: column;
+    width: 100%;
     border-radius: 7px;
-    /* gap: 10px; */
+    gap: 10px;
     margin-top: 10px;
-    justify-content: space-between;
   }
 
   .navbar-links.open {
     display: flex;
   }
-  .theme-toggle{
-    margin: 2px 41px;
-  }
 
   .search-bar, .type-filter {
-    width: 80%;
+    width: 43vw;
   }
 }
