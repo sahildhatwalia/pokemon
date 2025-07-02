@@ -64,17 +64,7 @@ function PokemonDetails() {
 
   const renderSkeletonCards = () => {
     return Array.from({ length: 10 }).map((_, index) => (
-      <div
-        key={index}
-        style={{
-          border: '2px solid rgba(255,255,255,0.3)',
-          borderRadius: '15px',
-          width: '220px',
-          height: '300px',
-          backgroundColor: 'rgba(255,255,255,0.2)',
-          animation: 'pulse 1.5s infinite ease-in-out',
-        }}
-      ></div>
+      <div key={index} className="shimmer-card"></div>
     ));
   };
 
@@ -122,12 +112,35 @@ function PokemonDetails() {
         {loading && pokemonList.length > 0 ? 'Loading...' : 'Load More'}
       </button>
 
-      {/* Optional: add pulse animation globally */}
+      {/* Shimmer Card Styles */}
       <style>{`
-        @keyframes pulse {
-          0% { opacity: 0.4; }
-          50% { opacity: 1; }
-          100% { opacity: 0.4; }
+        .shimmer-card {
+          position: relative;
+          overflow: hidden;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 15px;
+          width: 220px;
+          height: 300px;
+        }
+
+        .shimmer-card::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -150px;
+          width: 100px;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+          animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+          0% {
+            left: -150px;
+          }
+          100% {
+            left: 100%;
+          }
         }
       `}</style>
     </div>
