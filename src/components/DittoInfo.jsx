@@ -1,5 +1,5 @@
-// src/components/PokemonDetails.js
 import React, { useEffect, useState } from 'react';
+import AnimatedPokemonCard from './AnimatedPokemonCard';
 
 function PokemonDetails() {
   const [pokemonList, setPokemonList] = useState([]);
@@ -19,15 +19,12 @@ function PokemonDetails() {
             const pokeRes = await fetch(pokemon.url);
             const pokeData = await pokeRes.json();
 
-            // Abilities
             const abilities = pokeData.abilities.map((a) => a.ability.name);
 
-            // Location Area Encounters
             const locRes = await fetch(pokeData.location_area_encounters);
             const locationData = await locRes.json();
             const locations = locationData.map((l) => l.location_area.name);
 
-            // Evolution Chain
             const speciesRes = await fetch(pokeData.species.url);
             const speciesData = await speciesRes.json();
             const evoRes = await fetch(speciesData.evolution_chain.url);
@@ -40,20 +37,20 @@ function PokemonDetails() {
               current = current.evolves_to[0];
             }
 
-            // Official Artwork (static image)
-            const image = pokeData.sprites.other['official-artwork'].front_default;
+            const staticImage = pokeData.sprites.other['official-artwork'].front_default;
+            const animatedImage = pokeData.sprites?.versions?.['generation-v']?.['black-white']?.animated?.front_default;
 
             return {
               name: pokeData.name,
               abilities,
               locations,
               evolution: evolutionNames.join(' → '),
-              image,
+              staticImage,
+              animatedImage,
             };
           })
         );
 
-        // Append new batch to existing list
         setPokemonList((prev) => [...prev, ...detailedData]);
       } catch (err) {
         console.error('Failed to fetch data:', err);
@@ -64,6 +61,22 @@ function PokemonDetails() {
 
     fetchPokemonBatch();
   }, [offset]);
+
+  const renderSkeletonCards = () => {
+    return Array.from({ length: 10 }).map((_, index) => (
+      <div
+        key={index}
+        style={{
+          border: '2px solid rgba(255,255,255,0.3)',
+          borderRadius: '15px',
+          width: '220px',
+          height: '300px',
+          backgroundColor: 'rgba(255,255,255,0.2)',
+          animation: 'pulse 1.5s infinite ease-in-out',
+        }}
+      ></div>
+    ));
+  };
 
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
@@ -78,36 +91,19 @@ function PokemonDetails() {
           gap: '20px',
         }}
       >
-        {pokemonList.map((p, index) => (
-          <div
-            key={index}
-            style={{
-              border: '2px solid #ccc',
-              borderRadius: '15px',
-              width: '220px',
-              padding: '10px',
-              backgroundColor: '#f7f7f7',
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-              transition: 'transform 0.2s',
-              textAlign: 'center',
-            }}
-          >
-            <img
-              src={p.image || 'https://via.placeholder.com/150'}
-              alt={p.name}
-              style={{
-                width: '100%',
-                height: '150px',
-                objectFit: 'contain',
-                marginBottom: '10px',
-              }}
-            />
-            <h3>{p.name.toUpperCase()}</h3>
-            <p><strong>Abilities:</strong><br />{p.abilities.join(', ') || 'None'}</p>
-            <p><strong>Evolution:</strong><br />{p.evolution || 'None'}</p>
-            <p><strong>Locations:</strong><br />{p.locations.slice(0, 3).join(', ') || 'Unknown'}</p>
-          </div>
-        ))}
+        {loading && pokemonList.length === 0
+          ? renderSkeletonCards()
+          : pokemonList.map((p, index) => (
+              <AnimatedPokemonCard
+                key={index}
+                name={p.name}
+                staticImage={p.staticImage}
+                animatedImage={p.animatedImage}
+                abilities={p.abilities}
+                evolution={p.evolution}
+                locations={p.locations}
+              />
+            ))}
       </div>
 
       <button
@@ -117,16 +113,23 @@ function PokemonDetails() {
           padding: '10px 20px',
           fontSize: '16px',
           borderRadius: '10px',
-  color: 'rgb(219, 207, 210)',
-    backgroundColor: 'rgb(39, 72, 17)',
-
-          
+          color: 'rgb(219, 207, 210)',
+          backgroundColor: 'rgb(39, 72, 17)',
           border: 'none',
           cursor: 'pointer',
         }}
       >
-        {loading ? 'Loading...' : 'Load More'}
+        {loading && pokemonList.length > 0 ? 'Loading...' : 'Load More'}
       </button>
+
+      {/* Optional: add pulse animation globally */}
+      <style>{`
+        @keyframes pulse {
+          0% { opacity: 0.4; }
+          50% { opacity: 1; }
+          100% { opacity: 0.4; }
+        }
+      `}</style>
     </div>
   );
 }
