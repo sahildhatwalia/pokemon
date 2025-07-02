@@ -4,11 +4,14 @@ import React, { useEffect, useState } from 'react';
 function PokemonDetails() {
   const [pokemonList, setPokemonList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [limit, setLimit] = useState(50);
+  const [offset, setOffset] = useState(0);
 
   useEffect(() => {
-    const fetchAllPokemon = async () => {
+    const fetchPokemonBatch = async () => {
+      setLoading(true);
       try {
-        const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=650');
+        const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`);
         const data = await res.json();
 
         const detailedData = await Promise.all(
@@ -50,18 +53,17 @@ function PokemonDetails() {
           })
         );
 
-        setPokemonList(detailedData);
-        setLoading(false);
+        // Append new batch to existing list
+        setPokemonList((prev) => [...prev, ...detailedData]);
       } catch (err) {
         console.error('Failed to fetch data:', err);
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchAllPokemon();
-  }, []);
-
-  if (loading) return <p>Loading Pokémon details...</p>;
+    fetchPokemonBatch();
+  }, [offset]);
 
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
@@ -107,6 +109,24 @@ function PokemonDetails() {
           </div>
         ))}
       </div>
+
+      <button
+        onClick={() => setOffset(offset + limit)}
+        style={{
+          marginTop: '30px',
+          padding: '10px 20px',
+          fontSize: '16px',
+          borderRadius: '10px',
+  color: 'rgb(219, 207, 210)',
+    backgroundColor: 'rgb(39, 72, 17)',
+
+          
+          border: 'none',
+          cursor: 'pointer',
+        }}
+      >
+        {loading ? 'Loading...' : 'Load More'}
+      </button>
     </div>
   );
 }
